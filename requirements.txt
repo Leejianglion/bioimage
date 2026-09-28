@@ -1,0 +1,10 @@
+python-pptx>=1.0
+numpy>=1.24
+scipy>=1.10
+pillow>=10
+matplotlib>=3.7
+tifffile>=2023.1
+# optional: renders slides (with LibreOffice Impress installed) so the mapping can be checked by eye
+pymupdf>=1.24
+# tests
+pytest>=7
