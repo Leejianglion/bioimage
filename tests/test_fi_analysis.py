@@ -170,3 +170,18 @@ def test_near_duplicates_ignore_shared_illumination():
     planes = [dim_field("a", 7), dim_field("b", 7, gain=1.5), dim_field("c", 8)]
     pairs = measure.near_duplicates(planes, "G", (0.1, 0.1, 0.8, 0.8))
     assert [(a, b) for a, b, _ in pairs] == [("a", "b")]  # same field reused; c is a different field
+
+
+def test_office_2010_picture_corrections_are_reported():
+    from lxml import etree
+
+    from fi_analysis.deck import NS, _blip_effects
+
+    a, r, a14 = NS["a"], NS["r"], NS["a14"]
+    blip = etree.fromstring(
+        f'<a:blip xmlns:a="{a}" xmlns:r="{r}" r:embed="rId2"><a:extLst><a:ext uri="x">'
+        f'<a14:imgProps xmlns:a14="{a14}"><a14:imgLayer r:embed="rId3"><a14:imgEffect>'
+        '<a14:brightnessContrast bright="20000" contrast="40000"/>'
+        '</a14:imgEffect></a14:imgLayer></a14:imgProps></a:ext></a:extLst></a:blip>')
+    effects = _blip_effects(blip)
+    assert effects[0].startswith("imgLayer") and "brightnessContrast(bright=20000, contrast=40000)" in effects

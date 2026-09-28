@@ -213,8 +213,12 @@ def diagnose(lo, hi, channel, roi):
         reasons.append(f"{hi.key}：ROI 内 {mh['sat_frac']:.1%} 像素饱和，高端信号被截平，FI 被低估")
     for it in (lo, hi):
         if it.picture is not None and it.picture.effects:
-            reasons.append(f"{it.key}：PPT 里显示的是调整后的图（{'; '.join(it.picture.effects)}），"
-                           "你看到的亮度不是被测量的嵌入像素")
+            effects = "; ".join(it.picture.effects)
+            if any(e.startswith("imgLayer") for e in it.picture.effects):
+                reasons.append(f"{it.key}：PPT 用图片校正/艺术效果处理过这张图（{effects}），嵌入的像素可能已是"
+                               "处理后的结果，这张图的灰度和其它图不可比")
+            else:
+                reasons.append(f"{it.key}：PPT 里显示的是调整后的图（{effects}），你看到的亮度不是被测量的嵌入像素")
         reasons.extend(f"{it.key}：{f}" for f in it.flags if f.startswith("通道 "))
     t, (area_l, _), (area_h, _) = measure.pair_coverage(lo.plane, hi.plane, channel, roi)
     if mh["p99"] > ml["p99"] and area_h < area_l:
